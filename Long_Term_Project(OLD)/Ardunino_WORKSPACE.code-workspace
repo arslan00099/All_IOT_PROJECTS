@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../ESP_TEST"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../TestingWrover"
+		},
+		{
+			"path": "../ESP32CAM_Door_BELL"
+		}
+	],
+	"settings": {}
+}

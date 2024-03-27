@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "../../JSON_FILTER"
+		},
+		{
+			"path": "../../ArduinoUNO_FingerPrintSensor"
+		},
+		{
+			"name": "uno_TEST",
+			"path": "../../uno_TEST"
+		},
+		{
+			"path": "../../Long_Term_Project"
+		},
+		{
+			"name": "T-Watch",
+			"path": "../../T-Watch"
+		},
+		{
+			"name": "aaa",
+			"path": "../../aaa"
+		},
+		{
+			"path": "../../../My-TTGO-Watch-master"
+		},
+		{
+			"name": "esp32Cam-VideoRecording",
+			"path": "../../esp32Cam-VideoRecording"
+		}
+	],
+	"settings": {}
+}

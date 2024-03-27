@@ -1,0 +1,923 @@
+#include <AsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+
+
+
+
+    const char index_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>setting up device</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 400px;
+          margin: 0 auto;
+          display: grid;
+
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .cardp {
+          background-color: white;
+          width: 260px;
+          height: 180px;
+          border-radius: 2px;
+          padding-top: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 550px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+
+        .pic {
+          height: 30px;
+          width: 30px;
+        }
+      </style>
+
+      <center>
+
+
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>RACING</h1>
+    </div>
+
+
+    <body>
+
+
+      <div class="content">
+        <div class="card-grid">
+
+          <center>
+
+          </center>
+          <div class="card">
+            </br>
+            <right><button onclick="wifiButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>CONFIGURE WIFI</b></button></right></br></br>
+            <right><button onclick="jsonButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>ENTER USER INFO </b></button></right></br></br>
+            <right><button onclick="instaButton()" style="height: 35px; width: 280px;
+          border-radius:10px;"><b>START RACE</b></button></right><br><br>
+            <right><button onclick="logoutButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>LOGOUT</b></button></right><br><br>
+            <right><button onclick="restart()" style="height: 35px; width: 280px;
+          border-radius:10px;"><b>RESTART</b></button></right><br><br>
+
+
+            <script type="text/javascript">
+
+              function logoutButton() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/logout", true);
+                xhr.send();
+                setTimeout(function () { window.open("/logged-out", "_self"); }, 2000);
+              }
+
+              function wifiButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/wifi_open", "_self"); }, 1000);
+              }
+              function jsonButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/json_open", "_self"); }, 1000);
+              }
+              function instaButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/insta_open", "_self"); }, 1000);
+              }
+              function restart() {
+                var r = "restart";
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/DATA?output=" + r + "&state=restart", true);
+                xhr.send();
+
+              }
+              setInterval(function () {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                  if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("counter").innerHTML = this.responseText;
+
+                  }
+                };
+                xhttp.open("GET", "/counter", true);
+                xhttp.send();
+              }, 2000);
+            </script>
+          </div>
+        </div>
+      </div>
+    </body>
+    </div>
+    </center>
+
+    </html>
+    )rawliteral";
+
+    const char logout_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+    </head>
+
+    <body>
+      <center>
+        <p>Logged out or <a href="/">return to homepage</a>.</p>
+        <p><strong>SUCESSFULLY&nbsp;&nbsp;&nbsp;LOGOUT</strong> </p>
+      </center>
+    </body>
+
+    </html>
+    )rawliteral";
+
+    
+    const char wifi_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 400px;
+          margin: 0 auto;
+          display: grid;
+
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 550px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+      </style>
+      <center>
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>CONFIGURE WIFI</h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+            </br>
+            </br>
+
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SSID : </td>
+              <td> <input type="text" name="name" id="ssid" value="" style="height:27px ;" />
+              <td></br>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right"> PASSWORD : </td>
+              <td> <input type="text" name="name" id="passwordd" value="" style="height:27px ;" />
+              <td></br>
+            </table></br></br>
+            <center><button onclick="postdata();" style="height: 35px;
+    border-radius:10px;"><b>SAVE</b></button></center></br></br>
+
+
+
+
+            <script type="text/javascript">
+
+
+              function logoutButton() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/logout", true);
+                xhr.send();
+                setTimeout(function () { window.open("/logged-out", "_self"); }, 2000);
+              }
+
+              function wifiButton() {
+                var xhr = new XMLHttpRequest();
+
+
+                setTimeout(function () { window.open("/wifi_open", "_self"); }, 2000);
+              }
+
+
+              function postdata() {
+
+                var ssidvalue = document.getElementById("ssid").value;
+
+
+                var a = "SSID";
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/DATA?output=" + a + "&state=" + ssidvalue, true);
+                xhr.send();
+
+                var passwordvalue = document.getElementById("passwordd").value;
+
+                var b = "PASSWORD";
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/DATA?output=" + b + "&state=" + passwordvalue, true);
+                xhr.send();
+
+
+              }
+
+              window.onload = function () {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                  if (this.readyState == 4 && this.status == 200) {
+                    var myObj = JSON.parse(this.responseText);
+                    console.log(myObj);
+                    var assid = myObj.ssid;
+                    var pass = myObj.pass;
+                    ssid.value = assid;
+                    passwordd.value = pass;
+
+                  }
+                };
+                xhr.open("GET", "/readings", true);
+                xhr.send();
+              }
+            </script>
+
+            </br>
+            </br>
+
+          </div>
+          </br></br>
+        </div>
+      </div>
+
+    </body>
+    </div>
+    </center>
+
+    </html>
+    )rawliteral";
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const char insta_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 700px;
+          margin: 0 auto;
+          display: grid;
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card-flex {
+          max-width: 500px;
+          display: flex;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          height: 50px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 600px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+      </style>
+      <center>
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>RACE STATUS </h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">Enter Laps : </td>
+              <td> <input type="text" name="lapcount" id="lapcount" value="" style="height:27px ;" />
+
+                <button onclick="lapscounts();" style="height: 35px;
+              border-radius:10px;"><b>SAVE</b></button>
+              <td>
+            </table>
+          </div>
+          <div class="card">
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">WINNER : </td>
+              <td> <input type="text" name="findwinner" id="findwinner" placeholder="PENDING..." value=""
+                  style="height:27px ;" />
+                 <button onclick="restart()" style="height: 35px;
+              border-radius:10px;"><b>RESET</b></button><br><br>
+    <td>
+
+              
+            </table>
+          </div>
+          <script>
+  function restart() {
+    var r = "restart";
+    var xhr = new XMLHttpRequest();
+    location.reload();
+    xhr.open("GET", "/DATA?output=" + r + "&state=restart", true);
+    xhr.send();
+    // setTimeout(function () { reload; }, 5000);
+  }
+
+  function reload(){
+    
+  }
+            setInterval(function () {
+              getwinner();
+            }, 100);
+            function getwinner() {
+              var lapcountt = document.getElementById("lapcount").value;
+              // alert(lapcountt);
+              var carone = document.getElementById("laps" + lapcountt).value;
+              var cartwo = document.getElementById("lapss" + lapcountt).value;
+              if (carone > 0 || cartwo > 0) {
+                // alert("done");
+                winner();
+              }
+            }
+
+            function winner() {
+              var xhr = new XMLHttpRequest();
+              xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                  var myObj = JSON.parse(this.responseText);
+                  console.log(myObj);
+                  var winnerr = myObj.winner;
+                  findwinner.value = winnerr;
+
+                }
+              };
+              xhr.open("GET", "/winner", true);
+              xhr.send();
+            }
+
+
+          </script>
+          <!-- <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">Instagram Username : </td>
+              <td> <input type="text" name="instaname" id="instaname" value="" style="height:27px ;" />
+              <td></br>
+            </table> -->
+          <!-- </br>
+            <center><button onclick="postinsta();" style="height: 35px;
+    border-radius:10px;"><b>UPLOAD</b></button></center></br> -->
+          <div class="card-flex">
+            <div style="width: 270px; float:left; background:burlywood; border-radius: 10px; margin-bottom: 10px;"><br>
+              <b>CAR 1</b>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">DRIVER NAME </td>
+                <td> <input type="text" name="donename" id="donename" value="" style="height:27px ;" />
+                <td></br>
+              </table>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">COMPANY NAME
+                </td>
+                <td> <input type="text" name="dconename" id="dconename" value="" style="height:27px ;" />
+                <td>
+              </table><br>
+
+              <div id="divSelections"></div>
+
+
+
+
+
+
+              <script>
+                setInterval(function () {
+                  // Call a function repetatively with 2 Second interval
+                  getData();
+                }, 5000); //2000mSeconds update rate
+
+
+                function lapscounts() {
+                  //alert("done");
+
+                  var lapcount = document.getElementById("lapcount").value;
+                  location.reload();
+                  for (var i = 1; i <= lapcount; i++) {
+                    document.getElementById('divSelections').innerHTML += '<label>Laps' + i + ' :</label><input type="text" id="laps' + i + '" name="" style="height:20px; width:50px;margin-top:5px;"><br/>';
+                    document.getElementById('lapstwo').innerHTML += '<label>Laps' + i + ' :</label><input type="text" id="lapss' + i + '" name="" style="height:20px; width:50px; margin-top:5px;"><br/>';
+                  }
+
+                  var a = "lapscount";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + a + "&state=" + lapcount, true);
+                  xhr.send();
+
+
+                }
+                function lapscount(lapcount) {
+                  //alert("done");
+                  var lapcount = document.getElementById("lapcount").value;
+                  for (var i = 1; i <= lapcount; i++) {
+                    document.getElementById('divSelections').innerHTML += '<label>Laps' + i + ' :</label><input type="text" id="laps' + i + '" name="" style="height:20px; width:50px;margin-top:5px;"><br/>';
+                    document.getElementById('lapstwo').innerHTML += '<label>Laps' + i + ' :</label><input type="text" id="lapss' + i + '" name="" style="height:20px; width:50px; margin-top:5px;"><br/>';
+                  }
+                }
+
+                function getData() {
+                  var xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                      var lapa = myObj.lap0;
+                      var lapb = myObj.lap1;
+                      var lapc = myObj.lap2;
+                      var lapd = myObj.lap3;
+                      var lape = myObj.lap4;
+                      var lapf = myObj.lap5;
+                      var lapg = myObj.lap6;
+                      var laph = myObj.lap7;
+                      var lapi = myObj.lap8;
+                      var lapj = myObj.lap9;
+
+                      laps1.value = lapa;
+                      laps2.value = lapb;
+                      laps3.value = lapc;
+                      laps4.value = lapd;
+                      laps5.value = lape;
+                      laps6.value = lapf;
+                      laps7.value = lapg;
+                      laps8.value = laph;
+                      laps9.value = lapi;
+                      laps10.value = lapj;
+                    }
+                  };
+                  xhttp.open("GET", "/lapsone", true);
+                  xhttp.send();
+                }
+
+              </script>
+
+            </div>
+            <div style="width: 270px; float:left; height:auto; background:burlywood; margin-left: 10px; border-radius: 10px;margin-bottom: 10px;"><br>
+              <b>CAR 2</b>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">DRIVER NAME</td>
+                <td> <input type="text" name="dtwoname" id="dtwoname" value="" style="height:27px ;" />
+                <td>
+              </table>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">COMPANY NAME
+                </td>
+                <td> <input type="text" name="dctwoname" id="dctwoname" value="" style="height:27px ;" />
+                <td>
+              </table><br>
+
+              <div id="lapstwo"></div>
+
+
+
+              <script>
+
+
+
+
+                setInterval(function () {
+                  // Call a function repetatively with 2 Second interval
+                  getlapData();
+                }, 4500); //2000mSeconds update rate
+
+
+                function getlapData() {
+                  var xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                      var lapj = myObj.lapt0;
+                      var lapk = myObj.lapt1;
+                      var lapl = myObj.lapt2;
+                      var lapm = myObj.lapt3;
+                      var lapn = myObj.lapt4;
+                      var lapo = myObj.lapt5;
+                      var lapp = myObj.lapt6;
+                      var lapq = myObj.lapt7;
+                      var lapr = myObj.lapt8;
+                      var laps = myObj.lapt9;
+
+                      lapss1.value = lapj;
+                      lapss2.value = lapk;
+                      lapss3.value = lapl;
+                      lapss4.value = lapm;
+                      lapss5.value = lapn;
+                      lapss6.value = lapo;
+                      lapss7.value = lapp;
+                      lapss8.value = lapq;
+                      lapss9.value = lapr;
+                      lapss10.value = laps;
+
+
+                    }
+                  };
+                  xhttp.open("GET", "/lapstwo", true);
+                  xhttp.send();
+                }
+
+              </script>
+
+            </div>
+          </div>
+
+
+
+          <script type="text/javascript">
+            window.onload = function () {
+              var xhr = new XMLHttpRequest();
+              xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                  var myObj = JSON.parse(this.responseText);
+                  console.log(myObj);
+                  var D1name = myObj.D1name;
+                  var D2name = myObj.D2name;
+                  var D1Cname = myObj.D1Cname;
+                  var D2Cname = myObj.D2Cname;
+                  var lapcounts = myObj.lapcount;
+                  lapcount.value = lapcounts;
+                  donename.value = D1name;
+                  dtwoname.value = D2name;
+                  dconename.value = D1Cname;
+                  dctwoname.value = D2Cname;
+
+                  lapscount(lapcounts);
+
+                }
+              };
+              xhr.open("GET", "/readings", true);
+              xhr.send();
+            }
+          </script>
+
+          </br>
+
+          </br>
+        </div>
+      </div>
+    </body>
+    </div>
+    </center>
+
+    </html>
+    )rawliteral";
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const char json_html[] PROGMEM = R"rawliteral(
+
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 450px;
+          margin: 0 auto;
+          display: grid;
+
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 550px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+      </style>
+      <center>
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>CONFIGURE DRIVER INFO</h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+
+
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DRIVER
+                1 NAME : </td>
+              <td> <input type="text" name="donename" id="donename" value="" style="height:27px ;" />
+              <td></br>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DRIVER
+                2 NAME : </td>
+              <td> <input type="text" name="dtwoname" id="dtwoname" value="" style="height:27px ;" />
+              <td>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">DRIVER 1 COMPANY NAME :
+              </td>
+              <td> <input type="text" name="dconename" id="dconename" value="" style="height:27px ;" />
+              <td>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">DRIVER 2 COMPANY NAME :
+              </td>
+              <td> <input type="text" name="dctwoname" id="dctwoname" value="" style="height:27px ;" />
+              <td>
+            </table>
+            </table>
+
+
+            </br>
+
+            <button align='center'><input type="button" id="myButton" value="UPLOAD" onclick="postdata2();" style="height: 35px;
+    border-radius:10px;">
+
+
+
+              <script type="text/javascript">
+
+                function postdata2() {
+
+                  var donename = document.getElementById("donename").value;
+
+                  var a = "D1name";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + a + "&state=" + donename, true);
+                  xhr.send();
+
+                  var dtwoname = document.getElementById("dtwoname").value;
+                  var b = "D2name";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + b + "&state=" + dtwoname, true);
+                  xhr.send();
+
+                  var dconename = document.getElementById("dconename").value;
+                  var b = "D1Cname";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + b + "&state=" + dconename, true);
+                  xhr.send();
+
+                  var dctwoname = document.getElementById("dctwoname").value;
+                  var b = "D2Cname";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + b + "&state=" + dctwoname, true);
+                  xhr.send();
+                }
+
+                window.onload = function () {
+                  var xhr = new XMLHttpRequest();
+                  xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                      var D1name = myObj.D1name;
+                      var D2name = myObj.D2name;
+                      var D1Cname = myObj.D1Cname;
+                      var D2Cname = myObj.D2Cname;
+                      donename.value = D1name;
+                      dtwoname.value = D2name;
+                      dconename.value = D1Cname;
+                      dctwoname.value = D2Cname;
+
+                    }
+                  };
+                  xhr.open("GET", "/readings", true);
+                  xhr.send();
+                }
+              </script>
+          </div>
+          </br></br>
+        </div>
+      </div>
+
+    </body>
+    </div>
+    </center>
+
+    </html>
+
+    )rawliteral";

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package melodies;
+
+message Tone {
+  float frequency = 1;
+  int32 duration = 2;
+}
+
+message Melody {
+  string label = 1;
+  repeated Tone tones = 2;
+  float speed = 3;
+}
+ 

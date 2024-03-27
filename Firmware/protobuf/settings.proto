@@ -1,0 +1,126 @@
+ 
+syntax = "proto3";
+
+// Message to represent MQTT Topics
+message MQTTTopics {
+    repeated string topic = 1;
+}
+
+// Message to represent MQTT KeepAlive configuration
+message MQTTKeepAlive {
+    int32 keep_alive = 1;
+}
+
+// Message to represent MQTT CleanSession configuration
+message MQTTCleanSession {
+    bool cleanSession = 1;
+}
+
+// Message to represent MQTT configuration options
+message MQTTConfig {
+    string host = 1;
+
+    optional int32 port = 2;
+    optional MQTTTopics publish_topics = 3;
+    optional MQTTTopics subscribe_topics = 4;
+    optional MQTTKeepAlive keep_alive = 5;
+    optional MQTTCleanSession clean_session = 6;
+    optional int32 timeout = 7;
+}
+
+// Enumeration for BootSequence options
+enum BootSequence {
+
+    BOOT_SEQUENCE_UNKNWON = 0;
+    // Boot in Access Point (AP) mode only
+    BOOT_SEQUENCE_AP_ONLY = 1;
+
+    // Boot in Station mode, synchronize with an Access Point (AP), then switch back to Access Point (AP) mode
+    BOOT_SEQUENCE_STATION_SYNC_AP = 2;
+
+    // Boot in Station mode and fall back to Access Point (AP) mode if no AP is available
+    BOOT_SEQUENCE_STATION_FALLBACK_AP = 3;
+}
+
+// Possible configuration options for setting up the ESP in SoftAP mode
+message SoftAPConfig {
+    string SSID = 1;
+    optional string password = 2;
+    optional string psk = 3;
+    optional int32 channel = 4;
+    optional bool hidden = 5;
+    optional int32 max_connection = 6;
+    optional DHCPConfig dhcp_config = 7;
+    optional MDNSConfig mdns_config = 8;
+}
+
+// Message to represent mDNS (Multicast DNS) configuration for ESP32
+message MDNSConfig {
+    // Configuration for ESP32 mDNS
+     string device_name = 1;
+    string service_type = 2;
+    optional int32 port = 3;
+    optional bool advertise_ip = 4;
+}
+
+// Message to represent DNS configuration
+message DNSConfig {
+    optional string primary_dns = 1;
+    optional string secondary_dns = 2;
+}
+
+// Message to represent DHCP configuration
+message DHCPConfig {
+    // One of - Automatic or Static config
+    optional string ip = 1;
+    optional string gateway = 2;
+    optional string subnet = 3;
+}
+
+// Message to represent NTP (Network Time Protocol) configuration
+message NTPConfig {
+    string pool_server_name = 1;
+    int32 port = 2;
+}
+
+// Message to represent Access Point (AP) configuration
+message APConfig {
+    string SSID = 1;
+    string password = 2;
+    optional int32 channel = 3;
+    optional bool hidden = 4;
+    optional int32 max_connection =  5;
+    optional DNSConfig dns_config = 6;
+    optional DHCPConfig dhcp_config = 7;
+    optional MDNSConfig mdns_config = 8;
+}
+
+
+// Message to represent Wi-Fi configuration options
+message WiFiConfig {
+    repeated APConfig ap_config = 1;
+}
+
+// Message to represent device settings and configurations
+message Settings {
+    // Required fields
+    string device_name = 1;
+    BootSequence boot_sequence = 2;
+
+    // Optional fields with configurations
+    optional WiFiConfig wifi_config = 3;
+    optional SoftAPConfig soft_ap_config = 4;
+    optional MQTTConfig mqtt_config = 5;
+
+
+    // Optional flags to enable/disable features
+    optional bool enable_custom_mdns = 6;
+    optional bool enable_custom_dhcp = 7;
+    optional bool enable_custom_ntp = 8;
+    optional bool enable_mqtt = 9;
+    optional bool enable_esp_now = 10;
+    optional bool enable_websocket = 11;
+    optional bool enable_api_server = 12;
+
+
+}

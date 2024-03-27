@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NeutralCrow Access Point Configuration</title>
+  <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Access Point Configuration</h1>
+    <form id="apConfigForm" class="needs-validation" novalidate>
+      <div class="form-group">
+        <label for="ssid">SSID:</label>
+        <input type="text" class="form-control" id="ssid" required>
+        <div class="invalid-feedback">Please enter the SSID.</div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" class="form-control" id="password" required>
+        <div class="invalid-feedback">Please enter the password.</div>
+      </div>
+      <div class="form-group">
+        <label for="channel">Channel:</label>
+        <input type="number" class="form-control" id="channel" min="1" max="13" required>
+        <div class="invalid-feedback">Please enter a valid channel number between 1 and 13.</div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Configuration</button>
+    </form>
+    <p id="status" class="text-center mt-3"></p>
+  </div>
+  <!-- Add Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="access_point_script.js"></script>
+</body>
+</html>
+ 

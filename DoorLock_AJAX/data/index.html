@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 Button</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <button id="button">Click me</button>
+  <script>
+    $(document).ready(function() {
+      $("#button").click(function() {
+        $.ajax({
+          url: "/button",
+          type: "GET",
+          success: function(response) {
+            $("#result").text(response);
+          }
+        });
+      });
+    });
+  </script>
+  <div id="result"></div>
+</body>
+</html>

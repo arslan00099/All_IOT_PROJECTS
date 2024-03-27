@@ -1,0 +1,695 @@
+#include <AsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+
+
+
+
+    const char index_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>setting up device</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 400px;
+          margin: 0 auto;
+          display: grid;
+
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .cardp {
+          background-color: white;
+          width: 260px;
+          height: 180px;
+          border-radius: 2px;
+          padding-top: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 550px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+
+        .pic {
+          height: 30px;
+          width: 30px;
+        }
+      </style>
+
+      <center>
+
+
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>PUMP FINGER PRINT MENU</h1>
+    </div>
+
+
+    <body>
+
+
+      <div class="content">
+        <div class="card-grid">
+
+          <div class="card">
+            </br>
+            <right><button onclick="wifiButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>CONFIGURE WIFI</b></button></right></br></br>
+            <right><button onclick="showrecordButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>VIEW RECORDS </b></button></right></br></br>
+            <right><button onclick="enrolButton()" style="height: 35px; width: 280px;
+          border-radius:10px;"><b>ENROLL USER</b></button></right><br><br>
+            <!-- <right><button onclick="logoutButton()" style="height: 35px; width: 280px;
+    border-radius:10px;"><b>LOGOUT</b></button></right><br><br> -->
+        
+            <script type="text/javascript">
+
+
+              function logoutButton() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/logout", true);
+                xhr.send();
+                setTimeout(function () { window.open("/logged-out", "_self"); }, 2000);
+              }
+
+              function wifiButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/wifi_open", "_self"); }, 1000);
+              }
+              function showrecordButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/record_open", "_self"); }, 1000);
+              }
+              function enrolButton() {
+                var xhr = new XMLHttpRequest();
+                setTimeout(function () { window.open("/enrol_open", "_self"); }, 1000);
+              }
+              // function restart() {
+              //   var r = "restart";
+              //   var xhr = new XMLHttpRequest();
+              //   xhr.open("GET", "/DATA?output=" + r + "&state=restart", true);
+              //   xhr.send();
+              // }
+          
+            </script>
+          </div>
+        </div>
+      </div>
+    </body>
+    </div>
+    </center>
+    </html>
+    )rawliteral";
+
+
+
+    ///////////////////////////  SHOW RECORD /////////////////////////////////////////
+
+    const char showrecord_html[] PROGMEM = R"rawliteral(
+      <!DOCTYPE HTML>
+      <html>
+  
+      <head>
+        <title>setting up device</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta content="text/html; charset=utf-8" http-equiv="content-type">
+        <meta name="viewport" content="width=device-width, intial-scale=1">
+        <style>
+          html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+          }
+  
+          body {
+            max-width: 900px;
+            margin: 0px auto;
+            padding-bottom: 25px;
+          }
+  
+          .topnav {
+            overflow: hidden;
+            background-color: #0A1128;
+            width: 400px;
+  
+          }
+  
+  
+          .content {
+            padding: 5%;
+          }
+  
+          h1 {
+            font-size: 1.8rem;
+            color: white;
+          }
+  
+          .card-grid {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+  
+            grid-gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          }
+  
+          .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .cardp {
+            background-color: white;
+            width: 260px;
+            height: 180px;
+            border-radius: 2px;
+            padding-top: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .maindiv {
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 40px;
+            width: 550px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #034078
+          }
+  
+          .pic {
+            height: 30px;
+            width: 30px;
+          }
+        </style>
+  
+        <center>
+  
+  
+          <div class="maindiv">
+  
+  
+      </head>
+      <div class="topnav">
+        <h1>SHOW RECORD</h1>
+      </div>
+  
+  
+      <body>
+     <p> <a href="/">Return Back</a>.</p>
+  
+        <div class="content">
+          <div class="card-grid">
+  
+            <div class="card">
+              </br>
+                  <table align="center" cellpadding="4" cellspacing="4" enctype="multipart/form-data">
+                <td align="right">&nbsp;&nbsp; </td>
+                <td> <input type="text" name="data" id="data" value="" style="height:27px ;" />
+                <td></br>
+              </table>
+
+         <table id="rfid-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>RFID Number</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+          
+             <script>
+        // Function to create table rows
+        function createTableRow(id, rfidNum) {
+            var row = document.createElement("tr");
+
+            var idCell = document.createElement("td");
+            idCell.textContent = id;
+            row.appendChild(idCell);
+
+            var rfidNumCell = document.createElement("td");
+            rfidNumCell.textContent = rfidNum;
+            row.appendChild(rfidNumCell);
+
+            return row;
+        }
+
+        // Function to update table with JSON data
+        function updateTable(jsonData) {
+            var tableBody = document.getElementById("table-body");
+
+            // Clear existing table rows
+            tableBody.innerHTML = "";
+
+            // Iterate over the JSON data
+            for (var key in jsonData) {
+                if (jsonData.hasOwnProperty(key)) {
+                    var id = key;
+                    var rfidNum = jsonData[key].rfidnum;
+
+                    var row = createTableRow(id, rfidNum);
+
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
+        // Make HTTP request to get JSON data
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var responseData = JSON.parse(this.responseText);
+                updateTable(responseData);
+            }
+        };
+        xhr.open("GET", "/getRecord", true);
+        xhr.send();
+
+          setInterval(function () {
+    var xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                      var rf = myObj.data;
+                      data.value = rf;
+                    }
+                  };
+                  xhttp.open("GET", "/currentValue", true);
+                  xhttp.send();
+                }, 3000);
+    </script>
+            </div>
+          </div>
+        </div>
+      </body>
+      </div>
+      </center>
+      </html>
+      )rawliteral";
+
+
+
+      ///////////////////////////////  ENROL MENU ///////////////////////////////////  
+
+
+
+    const char enrol_html[] PROGMEM = R"rawliteral(
+      <!DOCTYPE HTML>
+      <html>
+  
+      <head>
+        <title>setting up device</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta content="text/html; charset=utf-8" http-equiv="content-type">
+        <meta name="viewport" content="width=device-width, intial-scale=1">
+        <style>
+          html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+          }
+  
+          body {
+            max-width: 900px;
+            margin: 0px auto;
+            padding-bottom: 25px;
+          }
+  
+          .topnav {
+            overflow: hidden;
+            background-color: #0A1128;
+            width: 400px;
+  
+          }
+  
+  
+          .content {
+            padding: 5%;
+          }
+  
+          h1 {
+            font-size: 1.8rem;
+            color: white;
+          }
+  
+          .card-grid {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+  
+            grid-gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          }
+  
+          .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .cardp {
+            background-color: white;
+            width: 260px;
+            height: 180px;
+            border-radius: 2px;
+            padding-top: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .maindiv {
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 40px;
+            width: 550px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #034078
+          }
+  
+          .pic {
+            height: 30px;
+            width: 30px;
+          }
+        </style>
+  
+        <center>
+  
+  
+          <div class="maindiv">
+  
+  
+      </head>
+      <div class="topnav">
+        <h1>Enroll USER</h1>
+      </div>
+  
+  
+      <body>
+         <p> <a href="/">Return Back</a>.</p>
+  
+        <div class="content">
+          <div class="card-grid">
+  
+            <div class="card">
+              </br>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">&nbsp;&nbsp; ENTER ID : </td>
+                <td> <input type="text" name="uid" id="uid" value="" style="height:27px ;" />
+                <td></br>
+              </table>
+              <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+                <td align="left">SCAN RFID : </td>
+                <td> <input type="text" name="rfidid" id="rfidid" value="" style="height:27px ;" />
+                <td>
+              </table><br><br>
+             <label id="myLabel"></label><br><br>
+
+              <button align='center'><input type="button" id="myButton" value="Enroll" onclick="postdata2();" style="height: 35px;
+                border-radius:10px;"><br>
+          
+              <script type="text/javascript">
+
+   
+  function postdata2() {
+
+var uid = document.getElementById("uid").value;
+var rfid = document.getElementById("rfidid").value;
+var a="keyid";
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "/update?output=" + a + "&state=" + uid, true);
+xhr.send();
+  }
+
+  setInterval(function () {
+    var xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                     
+     var label = document.getElementById("myLabel"); 
+       var ss = myObj.scnid;                   
+                      var rf = myObj.rfid;
+                      rfidid.value = ss;
+                      label.textContent = rf;
+                    }
+                  };
+                  xhttp.open("GET", "/getRfid", true);
+                  xhttp.send();
+                }, 1000);
+
+                
+            
+              </script>
+            </div>
+          </div>
+        </div>
+      </body>
+      </div>
+      </center>
+      </html>
+      )rawliteral";
+
+
+
+      
+    const char wifi_html[] PROGMEM = R"rawliteral(
+      <!DOCTYPE HTML>
+      <html>
+  
+      <head>
+        <title>ESP Web Server</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta content="text/html; charset=utf-8" http-equiv="content-type">
+        <meta name="viewport" content="width=device-width, intial-scale=1">
+        <style>
+          html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+          }
+  
+          body {
+            max-width: 900px;
+            margin: 0px auto;
+            padding-bottom: 25px;
+          }
+  
+          .topnav {
+            overflow: hidden;
+            background-color: #0A1128;
+            width: 400px;
+  
+          }
+  
+  
+          .content {
+            padding: 5%;
+          }
+  
+          h1 {
+            font-size: 1.8rem;
+            color: white;
+          }
+  
+          .card-grid {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+  
+            grid-gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          }
+  
+          .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .maindiv {
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 40px;
+            width: 550px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #034078
+          }
+        </style>
+        <center>
+          <div class="maindiv">
+  
+  
+      </head>
+      <div class="topnav">
+        <h1>CONFIGURE WIFI</h1>
+      </div>
+  
+  
+      <body>
+        <p> <a href="/">Return Back</a>.</p>
+  
+        <div class="content">
+          <div class="card-grid">
+            <div class="card">
+              </br>
+              </br>
+  
+              <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+                <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SSID : </td>
+                <td> <input type="text" name="name" id="ssid" value="" style="height:27px ;" />
+                <td></br>
+              </table>
+              <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+                <td align="right"> PASSWORD : </td>
+                <td> <input type="text" name="passwordd" id="passwordd" value="" style="height:27px ;" />
+                <td></br>
+              </table></br></br>
+              <center><button onclick="postdata();" style="height: 35px;
+      border-radius:10px;"><b>SAVE</b></button></center></br></br>
+  
+  
+  
+  
+              <script type="text/javascript">
+  
+  
+                function logoutButton() {
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/logout", true);
+                  xhr.send();
+                  setTimeout(function () { window.open("/logged-out", "_self"); }, 2000);
+                }
+  
+                function wifiButton() {
+                  var xhr = new XMLHttpRequest();
+  
+  
+                  setTimeout(function () { window.open("/wifi_open", "_self"); }, 2000);
+                }
+  
+  
+                function postdata() {
+  
+                  var ssidvalue = document.getElementById("ssid").value;
+  var pass = document.getElementById("passwordd").value;
+  
+                  var a = "ssid";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/update?output=" + a + "&state=" + ssidvalue, true);
+                  xhr.send();
+                  var b = "pass";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/update?output=" + b + "&state=" + pass, true);
+                  xhr.send();
+  
+  
+                }
+  
+                window.onload = function () {
+                  var xhr = new XMLHttpRequest();
+                  xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                      var myObj = JSON.parse(this.responseText);
+                      console.log(myObj);
+                      var assid = myObj.ssid;
+                      var pass = myObj.pass;
+                      ssid.value = assid;
+                      passwordd.value = pass;
+  
+                    }
+                  };
+                  xhr.open("GET", "/readings", true);
+                  xhr.send();
+                }
+              </script>
+  
+              </br>
+              </br>
+  
+            </div>
+            </br></br>
+          </div>
+        </div>
+  
+      </body>
+      </div>
+      </center>
+  
+      </html>
+      )rawliteral";
+  
+
+   

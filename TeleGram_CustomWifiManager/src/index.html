@@ -1,0 +1,640 @@
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
+const char index_html[] PROGMEM = R"rawliteral(
+  <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+     <meta name="apple-mobile-web-app-capable" content="yes">
+<meta content="text/html; charset=utf-8" http-equiv="content-type">
+<meta name="viewport" content="width=device-width, intial-scale=1">
+ <style>
+
+        html {font-family: Arial; display: inline-block; text-align: center;}
+
+       body {
+      max-width: 900px; margin:0px auto; padding-bottom: 25px;
+    }
+        .topnav {
+      overflow: hidden;
+      background-color: #0A1128;
+      width: 400px;
+
+    }
+
+
+      .content {
+      padding: 5%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .card-grid {
+      max-width: 400px;
+      margin: 0 auto;
+      display: grid;
+
+      grid-gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .card {
+      background-color: white;
+    border-radius: 10px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+     .cardp {
+      background-color: white;
+      width:130px;
+      height:130px;
+    border-radius: 5px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+    .maindiv {
+      background-color: white;
+      margin-top: 20px;
+      border-radius: 40px;
+      width: 550px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #034078
+    }
+    .pic{
+        height: 30px;
+  weight:30px;
+    }
+
+      </style>
+          <center>
+      <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>Configure Colibri</h1>
+    </div>
+
+
+    <body>
+      
+
+      <div class="content">
+        <div class="card-grid">
+        
+           <center> 
+          <div class="cardp">
+          </br>
+<img src="data:image/png;base64,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" alt="Red dot" />
+         </div>
+         </center>
+         <div class="card">
+           </br></br>
+            <right><button onclick="wifiButton()">CONFIGURE WIFI</button></right></br></br>
+            <right><button onclick="jsonButton()">COLIBRI SETTINGS</button></right></br></br>
+            <right><button onclick="logoutButton()">Restart</button></right></body></br></br>
+        
+          </br></br>
+            
+                  
+              <script type="text/javascript">
+              
+            function logoutButton() {
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", "/logout", true);
+              xhr.send();
+              setTimeout(function(){ window.open("/logged-out","_self"); }, 2000);
+            }
+            
+            function wifiButton() {
+              var xhr = new XMLHttpRequest();
+            setTimeout(function(){ window.open("/wifi_open","_self"); }, 1000);
+            }
+            function jsonButton() {
+              var xhr = new XMLHttpRequest();
+            setTimeout(function(){ window.open("/json_open","_self"); }, 1000);
+            }
+
+              setInterval(function ( ) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("counter").innerHTML = this.responseText;
+          
+          }
+        };
+        xhttp.open("GET", "/counter", true);
+        xhttp.send();
+      }, 2000 ) ;
+            
+             
+             
+            </script>
+
+
+    </div>
+    </br></br>
+    </div>
+    </div>
+
+    </body>
+  </div>
+  </center>
+    </html>
+)rawliteral";
+
+const char logout_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+<head>
+   <meta name="apple-mobile-web-app-capable" content="yes">
+<meta content="text/html; charset=utf-8" http-equiv="content-type">
+<meta name="viewport" content="width=device-width, intial-scale=1">
+</head>
+<body>
+<center>
+  <p>Logged out or <a href="/">return to homepage</a>.</p>
+  <p><strong>SUCESSFULLY&nbsp;&nbsp;&nbsp;LOGOUT</strong> </p>
+</center>
+</body>
+</html>
+)rawliteral";
+
+const char wifi_html[] PROGMEM = R"rawliteral(
+  <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+<meta content="text/html; charset=utf-8" http-equiv="content-type">
+<meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+
+        html {font-family: Arial; display: inline-block; text-align: center;}
+
+       body {
+      max-width: 900px; margin:0px auto; padding-bottom: 25px;
+    }
+        .topnav {
+      overflow: hidden;
+      background-color: #0A1128;
+      width: 400px;
+
+    }
+
+
+      .content {
+      padding: 5%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .card-grid {
+      max-width: 400px;
+      margin: 0 auto;
+      display: grid;
+
+      grid-gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .card {
+      background-color: white;
+    border-radius: 10px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+    .maindiv {
+      background-color: white;
+      margin-top: 20px;
+      border-radius: 40px;
+      width: 550px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #034078
+    }
+
+      </style>
+          <center>
+      <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>Configure WiFi</h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+            <div class="content">
+              <div class="card-grid">
+                <div class="card">
+                </br>
+                </br>
+           
+             <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                          <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SSID : </td>
+          <td> <input type="text" name="name" id="ssid" value="" /><td></br>
+               </table>
+                <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                          <td align="right" > PASSWORD : </td>
+          <td> <input type="text" name="name" id="passwordd" value="" /><td></br>
+               </table></br></br>
+               <center><button onclick="postdata();">SAVE</button></center></br></br> 
+                
+                  
+          
+                   
+            <script type="text/javascript">
+            var lastusedssid=localStorage.getItem('lastusedssid');
+            document.getElementById('ssid').value = lastusedssid;
+             var lastusedpassword=localStorage.getItem('lastusedpassword');
+            document.getElementById('passwordd').value = lastusedpassword;
+           
+          function logoutButton() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/logout", true);
+            xhr.send();
+            setTimeout(function(){ window.open("/logged-out","_self"); }, 2000);
+          }
+          
+          function wifiButton() {
+            var xhr = new XMLHttpRequest();
+          
+           
+            setTimeout(function(){ window.open("/wifi_open","_self"); }, 2000);
+          }
+          
+           
+           function postdata()
+          {
+          
+              var ssidvalue = document.getElementById("ssid").value;
+              localStorage.setItem('lastusedssid', ssidvalue);
+            
+              var a="SSID";
+                  var xhr = new XMLHttpRequest();
+              xhr.open("GET", "/update?output="+a+"&state="+ssidvalue, true);
+              xhr.send();
+             
+              var passwordvalue = document.getElementById("passwordd").value;
+              localStorage.setItem('lastusedpassword', passwordvalue);
+              var b="PASSWORD";
+                var xhr = new XMLHttpRequest();
+              xhr.open("GET", "/update?output="+b+"&state="+passwordvalue, true);
+              xhr.send();
+              alert("Sucessfully Uploaded");
+             
+          }
+          window.onload = function (){
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var myObj = JSON.parse(this.responseText);
+      console.log(myObj);
+      var assid = myObj.ssid;
+      var pass = myObj.pass;
+     ssid.value = assid;
+      passwordd.value = pass;
+
+    }
+  }; 
+  xhr.open("GET", "/readings", true);
+  xhr.send();
+}
+          </script>
+
+ </br>
+                   </br>
+
+    </div>
+    </br></br>
+    </div>
+    </div>
+
+    </body>
+  </div>
+  </center>
+    </html>
+)rawliteral";
+
+const char json_html[] PROGMEM = R"rawliteral(
+
+  <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+     <meta name="apple-mobile-web-app-capable" content="yes">
+<meta content="text/html; charset=utf-8" http-equiv="content-type">
+<meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+
+        html {font-family: Arial; display: inline-block; text-align: center;}
+
+       body {
+      max-width: 900px; margin:0px auto; padding-bottom: 25px;
+    }
+        .topnav {
+      overflow: hidden;
+      background-color: #0A1128;
+      width: 400px;
+
+    }
+
+
+      .content {
+      padding: 5%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .card-grid {
+      max-width: 400px;
+      margin: 0 auto;
+      display: grid;
+
+      grid-gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .card {
+      background-color: white;
+    border-radius: 10px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+    .maindiv {
+      background-color: white;
+      margin-top: 20px;
+      border-radius: 40px;
+      width: 550px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #034078
+    }
+
+      </style>
+          <center>
+      <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>Colibri Settings</h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+
+
+
+       <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Device ID : </td>
+    <td> <input type="text" name="name" id="dname" value="" /><td></br>
+
+         </table>
+
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp;&nbsp;&nbsp;Alias Name : </td>
+    <td> <input type="text" name="aliasname" id="aliasname" value="" /><td></br>
+
+         </table>
+
+
+          <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp; Alarm 1 ON : </td>
+    <td> <input type="text" name="name" id="oneon" value="" /><td>
+         </table>
+ <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+          <td align="right" > Alarm 1 OFF : </td>
+<td> <input type="text" name="name" id="oneoff" value="" /><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Alarm 2 ON : </td>
+<td> <input type="text" name="name" id="twoon" value="" /><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Alarm 2 OFF : </td>
+<td> <input type="text" name="name" id="twooff" value="" /><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Alarm 3 ON : </td>
+<td> <input type="text" id="threeon" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Alarm 3 OFF : </td>
+<td> <input type="text" id="threeoff" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Alarm 4 ON : </td>
+<td> <input type="text" id="fouron" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Alarm 4 OFF : </td>
+<td> <input type="text" id="fouroff" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Alarm 5 ON : </td>
+<td> <input type="text" id="fiveon" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Alarm 5 OFF : </td>
+<td> <input type="text" id="fiveoff" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Alarm 6 ON : </td>
+<td> <input type="text" id="sixon" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Alarm 6 OFF : </td>
+<td> <input type="text" id="sixoff" name="appt"><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp; Delay Time : </td>
+<td> <input type="text" id="delaytime" name="appt"><td>
+</table>
+
+
+</br>
+
+            <button align='center'><input type="button" id="myButton" value="Upload Settings"
+             onclick="postdata2();">
+
+
+      <script type="text/javascript">
+
+     function postdata2()
+    {
+
+var id = document.getElementById("dname").value;
+        var f="deviceid";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+f+"&state="+id, true);
+        xhr.send();
+        
+        var aliasname = document.getElementById("aliasname").value;
+        var f="alname";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+f+"&state="+aliasname, true);
+        xhr.send();
+       
+var oneon = document.getElementById("oneon").value;
+        var a="oneon";
+            var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+a+"&state="+oneon, true);
+        xhr.send();
+        
+
+
+          var oneoff = document.getElementById("oneoff").value;
+        var x="oneoff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+x+"&state="+oneoff, true);
+        xhr.send();
+       
+
+        var twoon = document.getElementById("twoon").value;
+        var b="twoon";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+b+"&state="+twoon, true);
+   xhr.send();
+
+   var twooff = document.getElementById("twooff").value;
+        var b="twooff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+b+"&state="+twooff, true);
+   xhr.send();
+   
+        var threeon = document.getElementById("threeon").value;
+        var f="threeon";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+f+"&state="+threeon, true);
+        xhr.send();
+   
+        var threeoff = document.getElementById("threeoff").value;
+        var c="threeoff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+threeoff, true);
+        xhr.send();
+        var fouron = document.getElementById("fouron").value;
+        var c="fouron";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+fouron, true);
+        xhr.send();
+        var fouroff = document.getElementById("fouroff").value;
+        var c="fouroff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+fouroff, true);
+        xhr.send();
+        var fiveon = document.getElementById("fiveon").value;
+        var c="fiveon";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+fiveon, true);
+        xhr.send();
+        var fiveoff = document.getElementById("fiveoff").value;
+        var c="fiveoff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+fiveoff, true);
+        xhr.send();
+        var sixon = document.getElementById("sixon").value;
+        var c="sixon";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+sixon, true);
+        xhr.send();
+        var sixoff = document.getElementById("sixoff").value;
+        var c="sixoff";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+sixoff, true);
+        xhr.send();
+        var dtime = document.getElementById("delaytime").value;
+        var c="dlytime";
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/update?output="+c+"&state="+dtime, true);
+        xhr.send();
+   
+        alert("Successfully Uploaded");
+    }
+
+window.onload = function (){
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var myObj = JSON.parse(this.responseText);
+      console.log(myObj);
+      var aname = myObj.did;
+       var alias = myObj.alias_name;
+      var oneof = myObj.oneoff;
+      var oneo = myObj.oneon;
+      var twoof = myObj.twooff;
+      var twoo = myObj.twoon;
+      var threeof = myObj.threeoff;
+      var threeo = myObj.threeon;
+      var fourof = myObj.fouroff;
+      var fouro = myObj.fouron;
+      var fiveof = myObj.fiveoff;
+      var fiveo = myObj.fiveon;
+      var sixof = myObj.sixoff;
+      var sixo = myObj.sixon;
+      var dly = myObj.dlytime;
+      //var fouro = myObj.fouron;
+
+     
+      // var arecemail = myObj.recemail;
+      // var arecemailcc = myObj.recemailcc;
+      // var aemailtime = myObj.emailtime;
+      dname.value = aname;
+      aliasname.value=alias;
+      oneoff.value = oneof;
+      oneon.value=oneo;
+      twooff.value=twoof;
+      twoon.value=twoo;
+      threeon.value=threeo;
+      threeoff.value=threeof;
+      fouroff.value=fourof;
+      fouron.value=fouro;
+      fiveoff.value=fiveof;
+      fiveon.value=fiveo;
+      sixoff.value=sixof;
+      sixon.value=sixo;
+      delaytime.value=dly;
+     
+    }
+  }; 
+  xhr.open("GET", "/readings", true);
+  xhr.send();
+}
+
+    </script>
+
+
+
+    </div>
+    </br></br>
+    </div>
+    </div>
+
+    </body>
+  </div>
+  </center>
+    </html>
+
+)rawliteral";

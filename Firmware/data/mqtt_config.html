@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MQTT Configuration</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="mb-4">MQTT Configuration</h1>
+    <form id="mqttConfigForm" class="needs-validation" novalidate>
+      <!-- MQTT Host -->
+      <div class="form-group">
+        <label for="host">Host:</label>
+        <input type="text" class="form-control" id="host" placeholder="Enter MQTT host" required>
+        <div class="invalid-feedback">
+          Please enter a valid MQTT host.
+        </div>
+      </div>
+      
+      <!-- MQTT Port -->
+      <div class="form-group">
+        <label for="port">Port:</label>
+        <input type="number" class="form-control" id="port" placeholder="Enter MQTT port" required>
+        <div class="invalid-feedback">
+          Please enter a valid MQTT port number between 1 and 65536.
+        </div>
+      </div>
+      
+      <!-- MQTT Topics -->
+      <div class="form-group">
+        <label for="topics">Topics:</label>
+        <textarea class="form-control" id="topics" rows="5" placeholder="Enter MQTT topics (comma-separated)" required></textarea>
+        <div class="invalid-feedback">
+          Please enter at least one MQTT topic.
+        </div>
+      </div>
+      
+      <!-- Keep Alive -->
+      <div class="form-group">
+        <label for="keepAlive">Keep Alive (seconds):</label>
+        <input type="number" class="form-control" id="keepAlive" placeholder="Enter Keep Alive interval in seconds" required>
+        <div class="invalid-feedback">
+          Please enter a valid Keep Alive interval.
+        </div>
+      </div>
+      
+      <!-- Clean Session -->
+      <div class="form-group">
+        <label for="cleanSession">Clean Session:</label>
+        <select class="form-control" id="cleanSession" required>
+          <option value="true">True</option>
+          <option value="false">False</option>
+        </select>
+        <div class="invalid-feedback">
+          Please select a valid option for Clean Session.
+        </div>
+      </div>
+      
+      <!-- MQTT Timeout -->
+      <div class="form-group">
+        <label for="timeout">Timeout (milliseconds):</label>
+        <input type="number" class="form-control" id="timeout" placeholder="Enter MQTT timeout in milliseconds" required>
+        <div class="invalid-feedback">
+          Please enter a valid MQTT timeout.
+        </div>
+      </div>
+      
+      <!-- Save Configuration Button -->
+      <button type="submit" class="btn btn-primary">Save Configuration</button>
+    </form>
+    
+    <!-- Status Message -->
+    <div id="status" class="mt-3"></div>
+  </div>
+  
+  <script src="mqtt_config_script.js"></script>
+</body>
+</html>
+ 

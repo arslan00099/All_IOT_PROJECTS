@@ -1,0 +1,108 @@
+/*
+  Complete project details: https://RandomNerdTutorials.com/esp32-https-requests/
+  Based on the BasicHTTPSClient.ino example found at Examples > BasicHttpsClient
+*/
+
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+
+// Replace with your network credentials
+const char* ssid = "RIGJAZZ";
+const char* password = "Kashmiri786";
+
+// www.howsmyssl.com root certificate authority, to verify the server
+// change it to your server root CA
+
+const char* rootCACertificate = \
+     "-----BEGIN CERTIFICATE-----\n" \
+"MIIGYzCCBUugAwIBAgIQAXyWwDvpf2m8ORfW4vhz7DANBgkqhkiG9w0BAQsFADBY\n" \
+"MQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEuMCwGA1UE\n" \
+"AxMlR2xvYmFsU2lnbiBBdGxhcyBSMyBEViBUTFMgQ0EgMjAyMiBRNDAeFw0yMjEx\n" \
+"MjgyMTI1MDRaFw0yMzEyMzAyMTI1MDNaMBQxEjAQBgNVBAMMCXR3aXRjaC50djCC\n" \
+"ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALw4a784/pqlLE35clbz9lLm\n" \
+"2r6rEnN+XuzQeSgER6xwBTaa5P2T7r2V/4PwFgGcYWLtjmEzB34EnoV/GccorzYK\n" \
+"t3mXryii5R4XA9o0Sr9Ep0GVn9CVvTmbSbpHqNZIJuW5tmBuCP6c0rVrnsfh/D20\n" \
+"D3CrhMv4t9bEjY6Np+K/58DBgsMGkxPo1i18lhmJSYtL4EwhTjRWPHOOUdMUS0cp\n" \
+"SngpOw2vwUMsPWHtKMKV5Vo/VI6XrNvjwUI4fiPdRPJ4RabYG4BDaQRnBL2mLafp\n" \
+"/UJSPpJUH+rD5RpuD899gFtdkIWbAUFbYFHxYRu6xpNC3KdKfFVH8rcK3JLTEp0C\n" \
+"AwEAAaOCA2swggNnMCEGA1UdEQQaMBiCCXR3aXRjaC50doILKi50d2l0Y2gudHYw\n" \
+"DgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAd\n" \
+"BgNVHQ4EFgQU1QrZcLgEufIby+hSyydnWILUs6owVwYDVR0gBFAwTjAIBgZngQwB\n" \
+"AgEwQgYKKwYBBAGgMgoBAzA0MDIGCCsGAQUFBwIBFiZodHRwczovL3d3dy5nbG9i\n" \
+"YWxzaWduLmNvbS9yZXBvc2l0b3J5LzAMBgNVHRMBAf8EAjAAMIGeBggrBgEFBQcB\n" \
+"AQSBkTCBjjBABggrBgEFBQcwAYY0aHR0cDovL29jc3AuZ2xvYmFsc2lnbi5jb20v\n" \
+"Y2EvZ3NhdGxhc3IzZHZ0bHNjYTIwMjJxNDBKBggrBgEFBQcwAoY+aHR0cDovL3Nl\n" \
+"Y3VyZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NhdGxhc3IzZHZ0bHNjYTIwMjJx\n" \
+"NC5jcnQwHwYDVR0jBBgwFoAUiGjZHxHEDh+bieCgQndfw3mOw24wSAYDVR0fBEEw\n" \
+"PzA9oDugOYY3aHR0cDovL2NybC5nbG9iYWxzaWduLmNvbS9jYS9nc2F0bGFzcjNk\n" \
+"dnRsc2NhMjAyMnE0LmNybDCCAX8GCisGAQQB1nkCBAIEggFvBIIBawFpAHcAb1N2\n" \
+"rDHwMRnYmQCkURX/dxUcEdkCwQApBo2yCJo32RMAAAGEwCEVKAAABAMASDBGAiEA\n" \
+"18sWfnyL4efZnLkJNVPYu5IBwI+URyq0Pq5cLBcPxhcCIQCY5hZaCj5BFOh2neFW\n" \
+"Q0TH+9nsck3BxmxMMCVT89c6bQB2AK33vvp8/xDIi509nB4+GGq0Zyldz7EMJMqF\n" \
+"hjTr3IKKAAABhMAhFR8AAAQDAEcwRQIgZIb+D8KKRQRLwQ4Np7xm7/5aDEqW8X54\n" \
+"7taBubtf9R8CIQCnvp4XF0W3bA37vfpV8/h9PD6tHAuIS1kn58/lKGf6DwB2AFWB\n" \
+"1MIWkDYBSuoLm1c8U/DA5Dh4cCUIFy+jqh0HE9MMAAABhMAhFZIAAAQDAEcwRQIg\n" \
+"U2tYM55usO/qGEcOAJ61eh68eT1dcgOHVgkQLDaBpAkCIQDGQgbLDxGBc/txvevS\n" \
+"OOCnLWY0b/W/sBbmLjtq5FP97TANBgkqhkiG9w0BAQsFAAOCAQEASfTCE6Gocq7a\n" \
+"uPsxbjqOVBo0x/82c+9+eW3n1xv7og8hLKegR2GqEAwx07+vM+ewAVak3R1QsVxL\n" \
+"1GG/xDCSPTgVi0Dd50Ckv4JIDNIjS2B+KgafskrDOZGIJ+q+jvriaahinFdztWIr\n" \
+"KtFgwRsq0GXE3dHCvhGvnYVv8Obx5cYNmtY7cJgmjMkeCPlGupR0RAGSierjrMBN\n" \
+"WMvB9SIJrm+BahIzMVCZ1ce0U3Wxahg23U+ytSkm29blhyZy0j2jCbmLeGQ0weZr\n" \
+"LdeXSvVk5oKcZElGThfIt/3lcgQZ6Wqg480lY5iY3o+R3LKAHcPwcHLQIigyDqiH\n" \
+"zvEjdUwTKQ==\n" \
+     "-----END CERTIFICATE-----\n";
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  // Initialize Wi-Fi
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {
+  WiFiClientSecure *client = new WiFiClientSecure;
+  if(client) {
+    // set secure client with certificate
+    client->setCACert(rootCACertificate);
+    //create an HTTPClient instance
+    HTTPClient https;
+
+    //Initializing an HTTPS communication using the secure client
+    Serial.print("[HTTPS] begin...\n");
+    if (https.begin(*client, "https://api.twitch.tv/helix/search/channels?query=robcdee&live_only=false")) {  // HTTPS
+      Serial.print("[HTTPS] GET...\n");
+      // start connection and send HTTP header
+      int httpCode = https.GET();
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+       Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
+      // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          // print server response payload
+          String payload = https.getString();
+          Serial.println(payload);
+        }
+      }
+      else {
+        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+      }
+      https.end();
+    }
+  }
+  else {
+    Serial.printf("[HTTPS] Unable to connect\n");
+  }
+  Serial.println();
+  Serial.println("Waiting 2min before the next round...");
+  delay(120000);
+}

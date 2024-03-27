@@ -1,0 +1,161 @@
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
+const char index_html[] PROGMEM = R"rawliteral(
+
+    <!DOCTYPE HTML>
+    <html>
+
+    <head>
+      <title>ADMIN PANEL</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta content="text/html; charset=utf-8" http-equiv="content-type">
+      <meta name="viewport" content="width=device-width, intial-scale=1">
+      <style>
+        html {
+          font-family: Arial;
+          display: inline-block;
+          text-align: center;
+        }
+
+        body {
+          max-width: 900px;
+          margin: 0px auto;
+          padding-bottom: 25px;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #0A1128;
+          width: 400px;
+
+        }
+
+
+        .content {
+          padding: 5%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .card-grid {
+          max-width: 450px;
+          margin: 0 auto;
+          display: grid;
+
+          grid-gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .maindiv {
+          background-color: white;
+          margin-top: 20px;
+          border-radius: 40px;
+          width: 550px;
+          box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #034078
+        }
+      </style>
+      <center>
+        <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>S2C ADMIN PANEL</h1>
+    </div>
+
+
+    <body>
+    
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+
+
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Customer ID : </td>
+              <td> <input type="text" name="donename" id="donename" value="" style="height:27px ;" />
+              <td></br>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Items
+                 : </td>
+              <td> <input type="text" name="dtwoname" id="dtwoname" value="" style="height:27px ;" />
+              <td>
+            </table>
+            <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+              <td align="right"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Price :
+              </td>
+              <td> <input type="text" name="dconename" id="dconename" value="" style="height:27px ;" />
+              <td>
+            </table>
+         
+            </br>
+
+            <button align='center'><input type="button" id="myButton" value="RECIEVED MONEY" onclick="postdata2();" style="height: 35px;
+    border-radius:10px;">
+
+
+
+              <script type="text/javascript">
+
+                function postdata2() {
+                  var donename = "Done";
+                  var a = "Key";
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("GET", "/DATA?output=" + a + "&state=" + donename, true);
+                  xhr.send();
+                }
+
+            window.onload = function () {
+  function fetchData() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        var myObj = JSON.parse(this.responseText);
+        console.log(myObj);
+        var D1name = myObj.cid;
+        var D2name = myObj.totalitem;
+        var D1Cname = myObj.price;
+        donename.value = D1name;
+        dtwoname.value = D2name;
+        dconename.value = D1Cname;
+      }
+    };
+    xhr.open("GET", "/readings", true);
+    xhr.send();
+  }
+
+  // Call the fetchData function every second (1000 milliseconds)
+  setInterval(fetchData, 1000);
+}
+              </script>
+          </div>
+          </br></br>
+        </div>
+      </div>
+
+    </body>
+    </div>
+    </center>
+
+    </html>
+)rawliteral";

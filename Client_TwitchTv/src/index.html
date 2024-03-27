@@ -1,0 +1,234 @@
+#include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  
+  
+  
+  
+      const char index_html[] PROGMEM = R"rawliteral(
+      <!DOCTYPE HTML>
+      <html>
+  
+      <head>
+        <title>setting up device</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta content="text/html; charset=utf-8" http-equiv="content-type">
+        <meta name="viewport" content="width=device-width, intial-scale=1">
+        <style>
+          html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+          }
+  
+          body {
+            max-width: 900px;
+            margin: 0px auto;
+            padding-bottom: 25px;
+          }
+  
+          .topnav {
+            overflow: hidden;
+            background-color: #0A1128;
+            width: 400px;
+  
+          }
+  
+  
+          .content {
+            padding: 5%;
+          }
+  
+          h1 {
+            font-size: 1.8rem;
+            color: white;
+          }
+  
+          .card-grid {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+  
+            grid-gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          }
+  
+          .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .cardp {
+            background-color: white;
+            width: 260px;
+            height: 180px;
+            border-radius: 2px;
+            padding-top: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .maindiv {
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 40px;
+            width: 550px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #034078
+          }
+  
+          .pic {
+            height: 30px;
+            width: 30px;
+          }
+        </style>
+  
+        <center>
+  
+  
+          <div class="maindiv">
+  
+  
+      </head>
+      <div class="topnav">
+        <h1>CONFIGURE YOUR DEVICE</h1>
+      </div>
+  
+  
+      <body>
+  
+            <div class="card">
+    <div class="content">
+      <div class="card-grid">
+        <div class="card">
+          <br><br>
+          <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+            <td><label for="sk6812">Choose Strip</label>
+              </td></table>
+      <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+          <label for="sk6812">Last Selected Strip</label>
+             <input type="stripname" name="stripname" id="stripname" value="" style="height:27px; width: 150px;" />
+  </td>
+  </table><br>
+          <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+  <td>
+  <label for="sk6812">sk6812</label>
+  <input type="radio" id="sk6812" name="strip" value="sk6812">
+  <label for="ws2812b">ws2812b</label>
+  <input type="radio" id="ws2812b" name="strip" value="ws2812b">
+  
+  </td></table>
+  <table align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data">
+            <td>
+        <select name="neo" id="neo">
+          <option value="leftstrip">Left Strip</option>
+          <option value="rightstrip">Right Strip</option>
+        </select></td>
+          <td>
+            <select name="mode" id="mode">
+              <option value="drl">DRL Mode</option>
+              <option value="neo">No DRL Mode</option>
+            </select>
+          </td>
+            <td> <input type="color" name="color" id="color" value="" style="height:27px ;" />
+            <td>
+          </table></br>
+    
+          <center><button onclick="postdata();" style="height: 35px;
+                            border-radius:10px;"><b> SAVE </b></button></center></br>
+        </div>
+    
+    
+    
+    
+        <script type="text/javascript">
+  
+  
+    // document.getElementById("color").onchange = function () {
+    //   backRGB = this.value;
+    //   alert(backRGB);
+    // }
+  
+          function postdata() {
+  
+            var neo = document.getElementById("neo").value;
+            if(neo == "leftstrip"){
+  var z="leftneoclr";
+            }
+            else{
+            var   z="rightneoclr";
+            }
+  
+            var clr = document.getElementById("color").value;
+             var mode = document.getElementById("mode").value;
+             var relement = document.querySelector('input[name="strip"]:checked');
+             var substr = clr.substr(1, 7);
+  
+             if(mode == "drl")
+            { 
+               var b = "drlcolor";
+  
+               var xhr = new XMLHttpRequest();
+               xhr.open("GET", "/DATA?output=" + b + "&state=" + substr, true);
+               xhr.send();
+            }
+            else{
+            var type=typeof(clr);
+            var b = "neo";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/DATA?output=" + b + "&state=" + neo, true);
+            xhr.send();
+  
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/DATA?output=" + z + "&state=" + substr, true);
+            xhr.send();
+            }
+            
+            var b = "strip";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/DATA?output=" + b + "&state=" + relement.value, true);
+            xhr.send();
+  
+            var b = "mode";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/DATA?output=" + b + "&state=" + mode, true);
+            xhr.send();
+  
+      
+            alert("Sucessfully Save");
+          }
+  
+          window.onload = foo();
+  
+          function foo() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+              if (this.readyState == 4 && this.status == 200) {
+                var myObj = JSON.parse(this.responseText);
+                console.log(myObj);
+                var sname = myObj.radio;
+                stripname.value= sname;
+               sname=checked;
+  
+              }
+            };
+            xhr.open("GET", "/readings", true);
+            xhr.send();
+            //setTimeout(foo, 7000);
+          }
+          foo();
+        </script>
+    
+        </br>
+        </br>
+    
+      </div>
+      
+    </div>
+   
+    </div>
+    </div></body></html>)rawliteral";

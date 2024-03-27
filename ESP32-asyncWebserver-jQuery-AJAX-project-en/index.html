@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ESP32 asyncWebserver-jQuery-ajax</title>
+        <script src="jquery-3.6.3.min.js"></script>
+        <script>
+            $(document).ready(function() {
+				
+				$.get("ledvalue", function(data) {
+					$('#led_status').val(data);
+				});
+					
+				var str = $("#led_status").val();
+				
+				if(str == "true") {
+					$("#ledswitch_button").text("Turn on the led!");
+				}
+				else {
+					$("#ledswitch_button").text("Turn off the led!");
+				}
+			
+				$("#ledswitch_button").click(function() {
+					str = $("#led_status").val();
+					
+					if(str == "true") {
+						$("#ledswitch_button").text("Turn on the led!");
+					}
+					else {
+						$("#ledswitch_button").text("Turn off the led!");
+					}
+					$.post("ledswitch", {
+						led: str
+					});
+					$.get("ledvalue", function(data) {
+						$('#led_status').val(data);
+					});
+				});
+				
+				setInterval(function () {
+					$.get("/sensorvalue", function(data) {
+						$('#sensor_result').html(data);
+					});
+				},1000);
+			});
+        </script>
+    </head>
+    <body>
+		<center>
+			<div style="height:20px;"></div>
+			<div id="sensor_result" style="height:40px;"></div>
+			
+			<input type="hidden" id="led_status" value="true" >
+			<button  id="ledswitch_button">led on/off</button>
+			
+		</center>
+    </body>
+</html>

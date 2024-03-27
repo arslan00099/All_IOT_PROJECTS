@@ -1,0 +1,77 @@
+{
+	"folders": [
+		{
+			"path": "../ESP32_Feeder"
+		},
+		{
+			"path": "../Gamican_TEMP_TACK"
+		},
+		{
+			"path": "../TempStick_POST Module"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../esp32_fourButton"
+		},
+		{
+			"path": "../RTC_change_resource"
+		},
+		{
+			"name": "ArduinoMegaVoice",
+			"path": "../ArduinoMegaVoice"
+		},
+		{
+			"path": "../auto_Connect_esp32"
+		},
+		{
+			"name": "ESP32_WebsocketConnection",
+			"path": "../ESP32_WebsocketConnection"
+		},
+		{
+			"name": "ArduinoUno_voice",
+			"path": "../ArduinoUno_voice"
+		},
+		{
+			"name": "esp32 ulptool",
+			"path": "../esp32 ulptool"
+		},
+		{
+			"name": "ulp_test",
+			"path": "../ulp_test"
+		},
+		{
+			"name": "esp32_webServer_client",
+			"path": "../esp32_webServer_client"
+		},
+		{
+			"path": "../AntennaSwitch"
+		},
+		{
+			"name": "esp32_WebClient",
+			"path": "../esp32_WebClient"
+		},
+		{
+			"path": "../ESP32CAM_Video_Stream"
+		},
+		{
+			"path": "../Streaming_Final"
+		},
+		{
+			"name": "Esp32BleReciever",
+			"path": "../Esp32BleReciever"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.html": "cpp",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"ranges": "cpp",
+			"thread": "cpp",
+			"bitset": "cpp"
+		}
+	}
+}

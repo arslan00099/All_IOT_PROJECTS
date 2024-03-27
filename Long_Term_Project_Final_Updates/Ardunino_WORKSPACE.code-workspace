@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"path": "../ESP_TEST"
+		},
+		{
+			"path": "."
+		},
+		{
+			"name": "DoorLock",
+			"path": "../DoorLock"
+		},
+		{
+			"name": "DoorLock_AJAX",
+			"path": "../DoorLock_AJAX"
+		},
+		{
+			"path": "E:/OLDPC/New folder/GSM_LiLYGO POST"
+		},
+		{
+			"name": "ESP8266_Curtain",
+			"path": "../ESP8266_Curtain"
+		},
+		{
+			"name": "esp32VideoCam",
+			"path": "../esp32VideoCam"
+		},
+		{
+			"name": "Pump_vechile_side",
+			"path": "../Pump_vechile_side"
+		},
+		{
+			"name": "HC-12REc",
+			"path": "../HC-12REc"
+		}
+	],
+	"settings": {}
+}

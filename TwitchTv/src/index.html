@@ -1,0 +1,195 @@
+#include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  
+  
+  
+  
+      const char index_html[] PROGMEM = R"rawliteral(
+      <!DOCTYPE HTML>
+      <html>
+  
+      <head>
+        <title>setting up device</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta content="text/html; charset=utf-8" http-equiv="content-type">
+        <meta name="viewport" content="width=device-width, intial-scale=1">
+        <style>
+          html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+          }
+  
+          body {
+            max-width: 900px;
+            margin: 0px auto;
+            padding-bottom: 25px;
+          }
+  
+          .topnav {
+            overflow: hidden;
+            background-color: #0A1128;
+            width: 400px;
+  
+          }
+  
+  
+          .content {
+            padding: 5%;
+          }
+  
+          h1 {
+            font-size: 1.8rem;
+            color: white;
+          }
+  
+          .card-grid {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+  
+            grid-gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          }
+  
+          .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .cardp {
+            background-color: white;
+            width: 260px;
+            height: 180px;
+            border-radius: 2px;
+            padding-top: 10px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .maindiv {
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 40px;
+            width: 550px;
+            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+          }
+  
+          .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #034078
+          }
+  
+          .pic {
+            height: 30px;
+            width: 30px;
+          }
+        </style>
+  
+        <center>
+  
+  
+          <div class="maindiv">
+  
+  
+      </head>
+      <div class="topnav">
+        <h1>CONFIGURE YOUR DEVICE</h1>
+      </div>
+  
+  
+      <body>
+  
+            <div class="card">
+    <div class="content">
+      <div class="card-grid">
+        <div class="card">
+          <br><br>
+       
+      <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+          <label for="sk6812">Enter Channel Name : </label>
+             <input type="text" name="abc" id="abc" value="" style="height:27px; width: 150px;" />
+  </td>
+  </table><br>
+  <table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <label for="sk6812">Enter User ID : </label>
+       <input type="userid" name="userid" id="userid" value="" style="height:27px; width: 150px;" />
+</td>
+</table><br>
+<table align="center" cellpadding="1" cellspacing="1" enctype="multipart/form-data">
+  <label for="sk6812">Enter Channel Secret : </label>
+     <input type="secret" name="secret" id="secret" value="" style="height:27px; width: 150px;" />
+</td>
+</table><br>
+    
+          <center><button onclick="postdata();" style="height: 35px;
+                            border-radius:10px;"><b> SAVE </b></button></center></br>
+        </div>
+    
+    
+    
+    
+        <script type="text/javascript">
+  
+  
+          function postdata() {
+  
+            var name = document.getElementById("abc").value;
+            var userid = document.getElementById("userid").value;
+             var sec = document.getElementById("secret").value;
+           
+               var b = "channel";
+              var xhr = new XMLHttpRequest();
+               xhr.open("GET", "/DATA?output=" + b + "&state=" + name, true);
+               xhr.send();
+
+               var c = "userid";
+              var xhr = new XMLHttpRequest();
+               xhr.open("GET", "/DATA?output=" + c + "&state=" + userid, true);
+               xhr.send();
+
+               var d = "usersec";
+              var xhr = new XMLHttpRequest();
+               xhr.open("GET", "/DATA?output=" + d + "&state=" + sec, true);
+               xhr.send();
+          
+  
+      
+            alert("Sucessfully Save");
+          }
+  
+          window.onload = foo();
+  
+          function foo() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+              if (this.readyState == 4 && this.status == 200) {
+                var myObj = JSON.parse(this.responseText);
+                console.log(myObj);
+              
+                var cname = myObj.channel;
+               // alert(cname);
+                var uid = myObj.uid;
+                var usec = myObj.sec;
+                abc.value= cname;
+                userid.value= uid;
+                secret.value= usec;
+           }
+            };
+            xhr.open("GET", "/readings", true);
+            xhr.send();
+           // setTimeout(foo, 5000);
+          }
+          foo();
+        </script>
+    
+        </br>
+        </br>
+    
+      </div>
+      
+    </div>
+   
+    </div>
+    </div></body></html>)rawliteral";

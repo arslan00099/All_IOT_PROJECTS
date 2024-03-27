@@ -1,0 +1,7 @@
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/unity.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/edit_cache.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/rebuild_cache.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/list_install_components.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/install.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/install/local.dir
+/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build/CMakeFiles/install/strip.dir

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package esp_now;
+
+// Enumeration for commands
+enum CommandCode {
+    UNKNWON = 0;
+    PING = 1;
+    PONG = 2;
+    PLAY_TONE = 3;
+    PLAY_TONE_OK = 4;
+    PLAY_TX = 5;
+    PLAY_TX_OK = 6;
+    SYNC_AP = 7;
+    SYNC_AP_OK = 8;
+    REBOOT = 9;
+} 
+
+message esp_now_msg {
+  string target_SSID = 1;
+  string source_SSID = 2;
+  string source_MAC = 3;
+  CommandCode command_code = 4;
+  string payload = 5;
+  int64 timestamp = 6;
+  int32 hops = 7;  
+}
+

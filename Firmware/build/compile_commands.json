@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build",
+  "command": "/usr/bin/gcc -I/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/.pio/libdeps/featheresp32/Unity/src -I/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/build -g -std=c11 -Waddress -Waggregate-return -Wformat-nonliteral -Wformat-security -Wformat -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wno-multichar -Wno-parentheses -Wno-type-limits -Wno-unused-parameter -Wunreachable-code -Wwrite-strings -Wpointer-arith -Werror -Wall -o CMakeFiles/unity.dir/src/unity.c.o -c /home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/.pio/libdeps/featheresp32/Unity/src/unity.c",
+  "file": "/home/yan/projects/cyberk9/FreedomTools/FreedomTools_Generic/Firmware/.pio/libdeps/featheresp32/Unity/src/unity.c",
+  "output": "CMakeFiles/unity.dir/src/unity.c.o"
+}
+]

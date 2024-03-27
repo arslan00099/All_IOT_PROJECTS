@@ -1,0 +1,373 @@
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+<head>
+  <title>ESP Web Server</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <style>
+   
+    html {font-family: Arial; display: inline-block; text-align: center;}
+    
+   body {  
+  max-width: 900px; margin:0px auto; padding-bottom: 25px;
+}
+    .topnav { 
+  overflow: hidden; 
+  background-color: #0A1128;
+  width: 900px;
+}
+
+
+  .content { 
+  padding: 5%;
+}
+h1 {
+  font-size: 1.8rem; 
+  color: white;
+}
+
+.card-grid { 
+  max-width: 400px; 
+  margin: 0 auto; 
+  display: grid; 
+  grid-gap: 2rem; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.card { 
+  background-color: white; 
+  box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+}
+
+.card-title { 
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #034078
+}
+   
+  </style>
+</head>
+<div class="topnav">
+  <h1>SETTING UP ESP</h1>
+</div>
+
+
+<body>
+<right><button onclick="logoutButton()">Logout</button></right></body></br></br>
+<right><button onclick="wifiButton()">CONFIGURE WIFI</button></right></br></br>
+<right><button onclick="jsonButton()">CONFIGURE JSON</button></right></br></br>
+ 
+
+      
+  <script type="text/javascript">
+  
+function logoutButton() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/logout", true);
+  xhr.send();
+  setTimeout(function(){ window.open("/logged-out","_self"); }, 2000);
+}
+
+function wifiButton() {
+  var xhr = new XMLHttpRequest();
+setTimeout(function(){ window.open("/wifi_open","_self"); }, 1000);
+}
+function jsonButton() {
+  var xhr = new XMLHttpRequest();
+setTimeout(function(){ window.open("/json_open","_self"); }, 1000);
+}
+
+ 
+ 
+</script>
+
+
+</body>
+</html>
+)rawliteral";
+
+const char logout_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<center>
+  <p>Logged out or <a href="/">return to homepage</a>.</p>
+  <p><strong>SUCESSFULLY&nbsp;&nbsp;&nbsp;LOGOUT</strong> </p>
+</center>
+</body>
+</html>
+)rawliteral";
+
+const char wifi_html[] PROGMEM = R"rawliteral(
+  <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="icon" href="data:,">
+      <style>
+       
+        html {font-family: Arial; display: inline-block; text-align: center;}
+        
+       body {  
+      max-width: 900px; margin:0px auto; padding-bottom: 25px;
+    }
+        .topnav { 
+      overflow: hidden; 
+      background-color: #0A1128;
+      width: 900px;
+    }
+    
+    
+      .content { 
+      padding: 5%;
+    }
+    h1 {
+      font-size: 1.8rem; 
+      color: white;
+    }
+    
+    .card-grid { 
+      max-width: 400px; 
+      margin: 0 auto; 
+      display: grid; 
+      grid-gap: 2rem; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .card { 
+      background-color: white; 
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+    
+    .card-title { 
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #034078
+    }
+       
+      </style>
+    </head>
+    <div class="topnav">
+      <h1>ESP Wi-Fi Manager</h1>
+    </div>
+    
+    
+    <body>
+      <p><a href="/">return Back</a>.</p>
+    
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+     
+       <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SSID : </td>
+    <td> <input type="text" name="name" id="ssid" value="" /><td></br>
+         </table>
+          <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" > PASSWORD : </td>
+    <td> <input type="text" name="name" id="passwordd" value="" /><td></br>
+         </table></br></br>
+            
+            <button align='center'><input type="button" id="myButton" value="Connect"
+             onclick="postdata();">
+    
+             
+      <script type="text/javascript">
+      var lastusedssid=localStorage.getItem('lastusedssid');
+      document.getElementById('ssid').value = lastusedssid;
+       var lastusedpassword=localStorage.getItem('lastusedpassword');
+      document.getElementById('passwordd').value = lastusedpassword;
+     
+    function logoutButton() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/logout", true);
+      xhr.send();
+      setTimeout(function(){ window.open("/logged-out","_self"); }, 2000);
+    }
+    
+    function wifiButton() {
+      var xhr = new XMLHttpRequest();
+    
+     
+      setTimeout(function(){ window.open("/wifi_open","_self"); }, 2000);
+    }
+    
+     
+     function postdata()
+    {
+    
+        var ssidvalue = document.getElementById("ssid").value;
+        localStorage.setItem('lastusedssid', ssidvalue);
+      
+        var a="SSID";
+            var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/SERVO1?output="+a+"&state="+ssidvalue, true);
+        xhr.send();
+       
+        var passwordvalue = document.getElementById("passwordd").value;
+        localStorage.setItem('lastusedpassword', passwordvalue);
+        var b="PASSWORD";
+          var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/SERVO1?output="+b+"&state="+passwordvalue, true);
+        xhr.send();
+    
+       
+    }
+    </script>
+    
+    
+    
+    </div>
+    </div>
+    </div>
+    </body>
+    </html>
+)rawliteral";
+
+
+const char json_html[] PROGMEM = R"rawliteral(
+
+  <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="icon" href="data:,">
+      <style>
+
+        html {font-family: Arial; display: inline-block; text-align: center;}
+
+       body {
+      max-width: 900px; margin:0px auto; padding-bottom: 25px;
+    }
+        .topnav {
+      overflow: hidden;
+      background-color: #0A1128;
+      width: 400px;
+
+    }
+
+
+      .content {
+      padding: 5%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .card-grid {
+      max-width: 400px;
+      margin: 0 auto;
+      display: grid;
+
+      grid-gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .card {
+      background-color: white;
+    border-radius: 10px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+    .maindiv {
+      background-color: white;
+      margin-top: 20px;
+      border-radius: 40px;
+      width: 550px;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #034078
+    }
+
+      </style>
+          <center>
+      <div class="maindiv">
+
+
+    </head>
+    <div class="topnav">
+      <h1>ESP Json configure</h1>
+    </div>
+
+
+    <body>
+      <p> <a href="/">Return Back</a>.</p>
+
+      <div class="content">
+        <div class="card-grid">
+          <div class="card">
+
+       <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name of Device : </td>
+    <td> <input type="text" name="name" id="name" value="" /><td></br>
+         </table>
+          <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+                    <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pulse Value : </td>
+    <td> <input type="text" name="name" id="pulse" value="" /><td>
+         </table>
+ <table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+          <td align="right" > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Counter Index Value : </td>
+<td> <input type="text" name="name" id="index" value="" /><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Sender Email : </td>
+<td> <input type="text" name="name" id="email" value="" /><td></br>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" > Sender Email Password : </td>
+<td> <input type="text" name="name" id="emailpass" value="" /><td>
+</table>
+<table  align="center" cellpadding="3" cellspacing="3" enctype="multipart/form-data" >
+  <td align="right" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reciever Email : </td>
+<td> <input type="text" name="name" id="recemail" value="" /><td>
+</table></br>
+
+            <button align='center'><input type="button" id="myButton" value="Upload Json setting"
+             onclick="postdata();">
+
+
+      <script type="text/javascript">
+
+     function postdata()
+    {
+
+        var name = document.getElementById("name").value;
+
+        var a="Name of device";
+            var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/SERVO1?output="+a+"&state="+name, true);
+        xhr.send();
+
+        var pulsevalue = document.getElementById("pulse").value;
+        localStorage.setItem('lastusedpassword', pulsevalue);
+        var b="Pulse value";
+          var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/SERVO1?output="+b+"&state="+pulsevalue, true);
+        xhr.send();
+
+
+    }
+    </script>
+
+
+
+    </div>
+    </br></br>
+    </div>
+    </div>
+
+    </body>
+  </div>
+  </center>
+    </html>
+
+)rawliteral";
